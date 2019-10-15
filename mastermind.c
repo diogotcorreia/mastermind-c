@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <stdbool.h>
 
 #define SEQUENCE_LENGTH 4
 #define ROUNDS 12
@@ -16,7 +17,8 @@ int rounds[ROUNDS][SEQUENCE_LENGTH];
 
 void generate_sequence();
 void play_round();
-void print_board();
+void print_board(bool end);
+void wait_for_guess();
 
 // Setup game
 int main()
@@ -50,13 +52,24 @@ void generate_sequence()
 
 void play_round()
 {
-  print_board();
+  print_board(false);
+  wait_for_guess();
 }
 
-void print_board()
+void print_board(bool end)
 {
-  printf(" ?  ?  ?  ? \n");
   int i, k;
+
+  // Choose whether to display ? or the actual correct sequence
+  if (end)
+    for (k = 0; k < SEQUENCE_LENGTH; k++)
+      printf(" %s%c " ANSI_COLOR_RESET, color_codes[sequence[k]], color_names[sequence[k]][0]);
+  else
+    for (k = 0; k < SEQUENCE_LENGTH; k++)
+      printf(" ? ");
+  printf("\n");
+
+  // Print the board
   for (i = 0; i < ROUNDS; i++)
   {
     for (k = 0; k < SEQUENCE_LENGTH; k++)
@@ -67,10 +80,28 @@ void print_board()
         printf(" . ");
         break;
       default:
-        printf(" %s%c" ANSI_COLOR_RESET, color_codes[rounds[i][k]], color_names[rounds[i][k]][0]);
+        printf(" %s%c " ANSI_COLOR_RESET, color_codes[rounds[i][k]], color_names[rounds[i][k]][0]);
         break;
       }
     }
     printf("\n");
   }
+
+  if (end)
+    return;
+  // Print instructions
+
+  printf("Available colors:");
+  for (k = 0; k < COLOR_AMOUNT; k++)
+    printf(" %s%s" ANSI_COLOR_RESET, color_codes[k], color_names[k]);
+  printf("\nType the first letter of the color in a sequence. Example: RGYC\n");
+}
+
+void wait_for_guess()
+{
+  char *guess[SEQUENCE_LENGTH];
+  printf("Your guess: ");
+  scanf("%s", guess);
+  printf("%s\n", guess);
+  // TODO
 }
