@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 #define SEQUENCE_LENGTH 4
 #define ROUNDS 12
@@ -19,6 +20,7 @@ void generate_sequence();
 void play_round();
 void print_board(bool end);
 void wait_for_guess();
+int get_color_index(char color);
 
 // Setup game
 int main()
@@ -52,8 +54,12 @@ void generate_sequence()
 
 void play_round()
 {
-  print_board(false);
-  wait_for_guess();
+  int round;
+  for (round = 0; round < ROUNDS; round++)
+  {
+    print_board(false);
+    wait_for_guess(round);
+  }
 }
 
 void print_board(bool end)
@@ -97,11 +103,36 @@ void print_board(bool end)
   printf("\nType the first letter of the color in a sequence. Example: RGYC\n");
 }
 
-void wait_for_guess()
+void wait_for_guess(int round)
 {
-  char *guess[SEQUENCE_LENGTH];
+  char guess[SEQUENCE_LENGTH + 10]; // add a buffer for wrong inputs
   printf("Your guess: ");
   scanf("%s", guess);
   printf("%s\n", guess);
-  // TODO
+  int i, guess_array[SEQUENCE_LENGTH];
+  for (i = 0; i < SEQUENCE_LENGTH; i++)
+  {
+    int color_index = get_color_index(guess[i]);
+    if (color_index == -1)
+    {
+      if (guess[i] == 0)
+        printf("The sequence must have %d colors. Please try again.\n", SEQUENCE_LENGTH);
+      else
+        printf("Color %c not found. Please try again.\n", guess[i]);
+      wait_for_guess(round);
+      return;
+    }
+    guess_array[i] = color_index;
+  }
+  for (i = 0; i < SEQUENCE_LENGTH; i++)
+    rounds[round][i] = guess_array[i];
+}
+
+int get_color_index(char color)
+{
+  int i;
+  for (i = 0; i < COLOR_AMOUNT; i++)
+    if (toupper(color) == color_names[i][0])
+      return i;
+  return -1;
 }
