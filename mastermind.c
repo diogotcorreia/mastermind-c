@@ -19,6 +19,7 @@ int rounds[ROUNDS][SEQUENCE_LENGTH];
 void generate_sequence();
 void play_round();
 void print_board(bool end);
+void print_clues(int round);
 void wait_for_guess();
 int get_color_index(char color);
 
@@ -60,6 +61,7 @@ void play_round()
     print_board(false);
     wait_for_guess(round);
   }
+  print_board(true);
 }
 
 void print_board(bool end)
@@ -90,6 +92,7 @@ void print_board(bool end)
         break;
       }
     }
+
     printf("\n");
   }
 
@@ -101,6 +104,15 @@ void print_board(bool end)
   for (k = 0; k < COLOR_AMOUNT; k++)
     printf(" %s%s" ANSI_COLOR_RESET, color_codes[k], color_names[k]);
   printf("\nType the first letter of the color in a sequence. Example: RGYC\n");
+}
+
+void print_clues(int round)
+{
+  int i, clues_available[SEQUENCE_LENGTH];
+  // Clone correct sequence
+  for (i = 0; i < SEQUENCE_LENGTH; i++)
+    clues_available[i] = sequence[i];
+  // TODO
 }
 
 void wait_for_guess(int round)
