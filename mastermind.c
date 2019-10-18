@@ -8,6 +8,8 @@
 #define ROUNDS 12
 
 #define ANSI_COLOR_RESET "\x1b[0m"
+#define ANSI_COLOR_RED "\x1b[31m"
+#define ANSI_COLOR_GREEN "\x1b[32m"
 
 #define COLOR_AMOUNT 6
 const char *color_names[COLOR_AMOUNT] = {"Red", "Green", "Yellow", "Blue", "Magenta", "Cyan"};
@@ -92,7 +94,7 @@ void print_board(bool end)
         break;
       }
     }
-
+    print_clues(i);
     printf("\n");
   }
 
@@ -111,8 +113,29 @@ void print_clues(int round)
   int i, clues_available[SEQUENCE_LENGTH];
   // Clone correct sequence
   for (i = 0; i < SEQUENCE_LENGTH; i++)
+  {
+    if (rounds[round][i] == sequence[i])
+    {
+      printf(ANSI_COLOR_GREEN "+" ANSI_COLOR_RESET);
+      clues_available[i] = -2; // Set to -2 so we can ignore it afterwards
+      continue;
+    }
     clues_available[i] = sequence[i];
-  // TODO
+  }
+
+  int k;
+  for (i = 0; i < SEQUENCE_LENGTH; i++)
+  {
+    if (clues_available[i] == -2)
+      continue;
+    for (k = 0; k < SEQUENCE_LENGTH; k++)
+      if (rounds[round][i] == clues_available[k])
+      {
+        printf(ANSI_COLOR_RED "-" ANSI_COLOR_RESET);
+        clues_available[k] = -1;
+        break;
+      }
+  }
 }
 
 void wait_for_guess(int round)
