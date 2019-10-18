@@ -10,6 +10,8 @@
 #define ANSI_COLOR_RESET "\x1b[0m"
 #define ANSI_COLOR_RED "\x1b[31m"
 #define ANSI_COLOR_GREEN "\x1b[32m"
+#define ANSI_COLOR_BOLD_GREEN "\x1b[1;32m"
+#define ANSI_COLOR_BOLD "\x1b[1;37m"
 
 #define COLOR_AMOUNT 6
 const char *color_names[COLOR_AMOUNT] = {"Red", "Green", "Yellow", "Blue", "Magenta", "Cyan"};
@@ -19,11 +21,12 @@ int sequence[SEQUENCE_LENGTH];
 int rounds[ROUNDS][SEQUENCE_LENGTH];
 
 void generate_sequence();
-void play_round();
+void play_game();
 void print_board(bool end);
 void print_clues(int round);
 void wait_for_guess();
 int get_color_index(char color);
+bool check_sequence(int round);
 
 // Setup game
 int main()
@@ -34,16 +37,13 @@ int main()
 
   generate_sequence();
 
-  //TODO remove after debugging
-  printf("%d %d %d %d\n", sequence[0], sequence[1], sequence[2], sequence[3]);
-
   // Fill 'rounds' variable
   int i, k;
   for (i = 0; i < ROUNDS; i++)
     for (k = 0; k < SEQUENCE_LENGTH; k++)
       rounds[i][k] = -1;
 
-  play_round();
+  play_game();
 
   return 0;
 }
@@ -55,21 +55,36 @@ void generate_sequence()
     sequence[i] = (rand() % (COLOR_AMOUNT));
 }
 
-void play_round()
+void play_game()
 {
+  system("@cls||clear");
   int round;
   for (round = 0; round < ROUNDS; round++)
   {
     print_board(false);
     wait_for_guess(round);
+    system("@cls||clear"); // Clear board
+    if (check_sequence(round))
+      break;
   }
   print_board(true);
+  if (rounds[ROUNDS - 1][0] == -1 || check_sequence(ROUNDS - 1))
+    printf(ANSI_COLOR_BOLD "You won! Well done :D\n\n" ANSI_COLOR_RESET);
+  else
+    printf(ANSI_COLOR_BOLD "You lost! Better luck next time ;)\n\n" ANSI_COLOR_RESET);
 }
 
 void print_board(bool end)
 {
-  int i, k;
+  // Keep instructions always on top
+  printf(ANSI_COLOR_BOLD "Game made by Diogo Correia\n" ANSI_COLOR_RESET);
+  printf("Your goal is to get the correct sequence!\n");
+  printf(ANSI_COLOR_BOLD_GREEN "PRO TIP:" ANSI_COLOR_RESET " After each play, there are clues next to the sequence you typed:\n");
+  printf(" - A " ANSI_COLOR_GREEN "+" ANSI_COLOR_RESET " means you've got a right color in the right spot.\n");
+  printf(" - A " ANSI_COLOR_RED "-" ANSI_COLOR_RESET " means you've got a right color in the wrong spot.\n");
+  printf("GLHF!\n\n" ANSI_COLOR_RESET);
 
+  int i, k;
   // Choose whether to display ? or the actual correct sequence
   if (end)
     for (k = 0; k < SEQUENCE_LENGTH; k++)
@@ -143,7 +158,6 @@ void wait_for_guess(int round)
   char guess[SEQUENCE_LENGTH + 10]; // add a buffer for wrong inputs
   printf("Your guess: ");
   scanf("%s", guess);
-  printf("%s\n", guess);
   int i, guess_array[SEQUENCE_LENGTH];
   for (i = 0; i < SEQUENCE_LENGTH; i++)
   {
@@ -170,4 +184,13 @@ int get_color_index(char color)
     if (toupper(color) == color_names[i][0])
       return i;
   return -1;
+}
+
+bool check_sequence(int round)
+{
+  int i;
+  for (i = 0; i < SEQUENCE_LENGTH; i++)
+    if (rounds[round][i] != sequence[i])
+      return false;
+  return true;
 }
