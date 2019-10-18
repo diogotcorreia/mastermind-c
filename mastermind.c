@@ -80,7 +80,7 @@ void print_board(bool end)
   printf("\n");
 
   // Print the board
-  for (i = 0; i < ROUNDS; i++)
+  for (i = ROUNDS - 1; i >= 0; i--)
   {
     for (k = 0; k < SEQUENCE_LENGTH; k++)
     {
